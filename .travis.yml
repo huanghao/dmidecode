@@ -1,0 +1,5 @@
+language: python
+install:
+  - pip install -r test-requirements.txt
+script:
+  - py.test tests.py
