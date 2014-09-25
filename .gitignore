@@ -54,7 +54,4 @@ docs/_build/
 target/
 
 # virtualenv
-bin/
-local/
-include/
-lib/
+venv/

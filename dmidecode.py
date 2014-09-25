@@ -1,5 +1,7 @@
 import re
 
+__version__ = 0.8
+
 
 def parse_kv(lines):
     data = {
