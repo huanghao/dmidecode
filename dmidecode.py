@@ -1,27 +1,4 @@
-import re
-
 __version__ = 0.8
-
-
-def parse_kv(lines):
-    data = {
-        '_title': lines.next().rstrip(),
-        }
-
-    for line in lines:
-        line = line.rstrip()
-        if line.startswith('\t\t'):
-            data[k].append(line.lstrip())
-        elif line.startswith('\t'):
-            k, v = [i.strip() for i in line.lstrip().split(':', 1)]
-            if v:
-                data[k] = v
-            else:
-                data[k] = []
-        else:
-            break
-
-    return data
 
 
 TYPE = {
@@ -49,6 +26,10 @@ TYPE = {
 
 
 def parse_dmi(content):
+    """
+    Parse the whole dmidecode output.
+    Returns a list of tuples of (type int, value dict).
+    """
     info = []
     lines = iter(content.strip().splitlines())
     while True:
@@ -60,12 +41,59 @@ def parse_dmi(content):
         if line.startswith('Handle 0x'):
             typ = int(line.split(',', 2)[1].strip()[len('DMI type'):])
             if typ in TYPE:
-                info.append((typ, parse_kv(lines)))
+                info.append((typ, _parse_handle_section(lines)))
     return info
 
 
-def get_profile(content):
+def _parse_handle_section(lines):
+    """
+    Parse a section of dmidecode output
+
+    * 1st line contains address, type and size
+    * 2nd line is title
+    * line started with one tab is one option and its value
+    * line started with two tabs is a member of list
+    """
+    data = {
+        '_title': lines.next().rstrip(),
+        }
+
+    for line in lines:
+        line = line.rstrip()
+        if line.startswith('\t\t'):
+            data[k].append(line.lstrip())
+        elif line.startswith('\t'):
+            k, v = [i.strip() for i in line.lstrip().split(':', 1)]
+            if v:
+                data[k] = v
+            else:
+                data[k] = []
+        else:
+            break
+
+    return data
+
+
+def profile():
+    import os, sys
+    if os.isatty(sys.stdin.fileno()):
+        content = _get_output()
+    else:
+        content = sys.stdin.read()
+
     info = parse_dmi(content)
+    _show(info)
+
+
+def _get_output():
+    import subprocess
+    output = subprocess.check_output(
+        'PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin '
+        'sudo dmidecode', shell=True)
+    return output
+
+
+def _show(info):
     def _get(i):
         return [v for j, v in info if j == i]
 
@@ -101,8 +129,4 @@ def get_profile(content):
 
 
 if __name__ == '__main__':
-    import sys
-    from pprint import pprint
-    dmi = sys.stdin.read()
-    #pprint(parse_dmi(dmi))
-    get_profile(dmi)
+    profile()
