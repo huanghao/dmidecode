@@ -15,7 +15,7 @@ TYPE = {
     #13: 'bios language',
     15: 'system event log',
     16: 'physical memory array',
-    17: 'memory_device',
+    17: 'memory device',
     19: 'memory array mapped address',
     24: 'hardware security',
     25: 'system power controls',
@@ -41,7 +41,7 @@ def parse_dmi(content):
         if line.startswith('Handle 0x'):
             typ = int(line.split(',', 2)[1].strip()[len('DMI type'):])
             if typ in TYPE:
-                info.append((typ, _parse_handle_section(lines)))
+                info.append((TYPE[typ], _parse_handle_section(lines)))
     return info
 
 
@@ -97,7 +97,7 @@ def _show(info):
     def _get(i):
         return [v for j, v in info if j == i]
 
-    system = _get(1)[0]
+    system = _get('system')[0]
     print '%s %s (SN: %s, UUID: %s)' % (
         system['Manufacturer'],
         system['Product Name'],
@@ -105,7 +105,7 @@ def _show(info):
         system['UUID'],
         )
 
-    for cpu in _get(4):
+    for cpu in _get('processor'):
         print '%s %s %s (Core: %s, Thead: %s)' % (
             cpu['Manufacturer'],
             cpu['Family'],
@@ -115,7 +115,7 @@ def _show(info):
             )
 
     cnt, total, unit = 0, 0, None
-    for mem in _get(17):
+    for mem in _get('memory device'):
         if mem['Size'] == 'No Module Installed':
             continue
         i, unit = mem['Size'].split()

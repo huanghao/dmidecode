@@ -36,7 +36,7 @@ BIOS Information
 		Targeted content distribution is supported
 	BIOS Revision: 0.0
 """
-    assert parse_dmi(output)[0] == (0,  {
+    assert parse_dmi(output)[0] == ('bios',  {
             '_title': "BIOS Information",
             "Vendor": "Dell Inc.",
             "Version": "A04",
@@ -83,7 +83,7 @@ System Information
 	SKU Number: Not Specified
 	Family: Not Specified
 """
-    assert parse_dmi(output)[0] == (1, {
+    assert parse_dmi(output)[0] == ('system', {
             "_title": "System Information",
             "Manufacturer": "Dell Inc.",
             "Product Name": "OptiPlex 980",
