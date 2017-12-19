@@ -95,3 +95,55 @@ System Information
             "Family": "Not Specified",
             })
 
+def test_cpu_vm():
+    output = """
+Handle 0x0004, DMI type 4, 42 bytes
+Processor Information
+	Socket Designation: CPU #000
+	Type: Central Processor
+	Family: Unknown
+	Manufacturer: GenuineIntel
+	ID: F0 06 03 00 FF FB AB 1F
+	Version: Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz
+	Voltage: 3.3 V
+	External Clock: Unknown
+	Max Speed: 30000 MHz
+	Current Speed: 2600 MHz
+	Status: Populated, Enabled
+	Upgrade: ZIF Socket
+	L1 Cache Handle: 0x0018
+	L2 Cache Handle: 0x001C
+	L3 Cache Handle: Not Provided
+	Serial Number: Not Specified
+	Asset Tag: Not Specified
+	Part Number: Not Specified
+	Core Count: 4
+	Core Enabled: 4
+	Characteristics:
+		64-bit capable
+		Multi-Core
+		Execute Protection
+"""
+    assert parse_dmi(output)[0] == ('processor',
+ {'Asset Tag': 'Not Specified',
+  'Characteristics': ['64-bit capable', 'Multi-Core', 'Execute Protection'],
+  'Core Count': '4',
+  'Core Enabled': '4',
+  'Current Speed': '2600 MHz',
+  'External Clock': 'Unknown',
+  'Family': 'Unknown',
+  'ID': 'F0 06 03 00 FF FB AB 1F',
+  'L1 Cache Handle': '0x0018',
+  'L2 Cache Handle': '0x001C',
+  'L3 Cache Handle': 'Not Provided',
+  'Manufacturer': 'GenuineIntel',
+  'Max Speed': '30000 MHz',
+  'Part Number': 'Not Specified',
+  'Serial Number': 'Not Specified',
+  'Socket Designation': 'CPU #000',
+  'Status': 'Populated, Enabled',
+  'Type': 'Central Processor',
+  'Upgrade': 'ZIF Socket',
+  'Version': 'Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz',
+  'Voltage': '3.3 V',
+  '_title': 'Processor Information'})
