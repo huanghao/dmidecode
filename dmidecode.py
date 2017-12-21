@@ -107,10 +107,9 @@ def _show(info):
         return [v for j, v in info if j == i]
 
     system = _get('system')[0]
-    print ('%s %s (Version:%s, SN: %s, UUID: %s)' % (
+    print ('%s %s (SN: %s, UUID: %s)' % (
         system['Manufacturer'],
         system['Product Name'],
-        system['Version'],
         system['Serial Number'],
         system['UUID'],
         ))
@@ -141,7 +140,13 @@ def _show(info):
         total,
         unit,
         ))
-
+    bios = _get('bios')[0]
+    print ('BIOS: %s v.%s %s Systemversion: %s' % (
+        bios['Vendor'],
+        bios['Version'],
+        bios['Release Date'],
+        system['Version']
+        ))
 
 if __name__ == '__main__':
     profile()
