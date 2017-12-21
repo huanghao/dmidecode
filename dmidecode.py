@@ -1,4 +1,5 @@
 from __future__ import print_function
+import os, sys
 
 __version__ = "0.8.1"
 
@@ -76,7 +77,6 @@ def _parse_handle_section(lines):
 
 
 def profile():
-    import os, sys
     if os.isatty(sys.stdin.fileno()):
         content = _get_output()
     else:
@@ -88,9 +88,17 @@ def profile():
 
 def _get_output():
     import subprocess
-    output = subprocess.check_output(
+    try:
+        output = subprocess.check_output(
         'PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin '
         'sudo dmidecode', shell=True)
+    except Exception as e:
+        print(e, file=sys.stderr)
+        if str(e).find("command not found") == -1:
+            print("please install dmidecode", file=sys.stderr)
+            print("e.g. sudo apt install dmidecode",file=sys.stderr)
+
+        sys.exit(1)
     return output.decode()
 
 
@@ -99,9 +107,10 @@ def _show(info):
         return [v for j, v in info if j == i]
 
     system = _get('system')[0]
-    print ('%s %s (SN: %s, UUID: %s)' % (
+    print ('%s %s (Version:%s, SN: %s, UUID: %s)' % (
         system['Manufacturer'],
         system['Product Name'],
+        system['Version'],
         system['Serial Number'],
         system['UUID'],
         ))
