@@ -1,7 +1,7 @@
 from __future__ import print_function
 import os, sys
 
-__version__ = "0.8.1"
+__version__ = "0.9.0"
 
 TYPE = {
     0:  'bios',
