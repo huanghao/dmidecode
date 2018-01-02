@@ -1,5 +1,7 @@
-__version__ = "0.8.1"
+from __future__ import print_function
+import os, sys
 
+__version__ = "0.9.0"
 
 TYPE = {
     0:  'bios',
@@ -34,7 +36,7 @@ def parse_dmi(content):
     lines = iter(content.strip().splitlines())
     while True:
         try:
-            line = lines.next()
+            line = next(lines)
         except StopIteration:
             break
 
@@ -55,7 +57,7 @@ def _parse_handle_section(lines):
     * line started with two tabs is a member of list
     """
     data = {
-        '_title': lines.next().rstrip(),
+        '_title': next(lines).rstrip(),
         }
 
     for line in lines:
@@ -75,7 +77,6 @@ def _parse_handle_section(lines):
 
 
 def profile():
-    import os, sys
     if os.isatty(sys.stdin.fileno()):
         content = _get_output()
     else:
@@ -87,10 +88,18 @@ def profile():
 
 def _get_output():
     import subprocess
-    output = subprocess.check_output(
+    try:
+        output = subprocess.check_output(
         'PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin '
         'sudo dmidecode', shell=True)
-    return output
+    except Exception as e:
+        print(e, file=sys.stderr)
+        if str(e).find("command not found") == -1:
+            print("please install dmidecode", file=sys.stderr)
+            print("e.g. sudo apt install dmidecode",file=sys.stderr)
+
+        sys.exit(1)
+    return output.decode()
 
 
 def _show(info):
@@ -98,21 +107,26 @@ def _show(info):
         return [v for j, v in info if j == i]
 
     system = _get('system')[0]
-    print '%s %s (SN: %s, UUID: %s)' % (
+    print ('%s %s (SN: %s, UUID: %s)' % (
         system['Manufacturer'],
         system['Product Name'],
         system['Serial Number'],
         system['UUID'],
-        )
+        ))
 
     for cpu in _get('processor'):
-        print '%s %s %s (Core: %s, Thead: %s)' % (
+        #fix for output in virtual machine environments
+        if 'Thread Count' in cpu:
+            threads = cpu['Thread Count']
+        else:
+            threads = "-"
+        print ('%s %s %s (Core: %s, Thead: %s)' % (
             cpu['Manufacturer'],
             cpu['Family'],
             cpu['Max Speed'],
             cpu['Core Count'],
-            cpu['Thread Count'],
-            )
+            threads,
+            ))
 
     cnt, total, unit = 0, 0, None
     for mem in _get('memory device'):
@@ -121,12 +135,18 @@ def _show(info):
         i, unit = mem['Size'].split()
         cnt += 1
         total += int(i)
-    print '%d memory stick(s), %d %s in total' % (
+    print ('%d memory stick(s), %d %s in total' % (
         cnt,
         total,
         unit,
-        )
-
+        ))
+    bios = _get('bios')[0]
+    print ('BIOS: %s v.%s %s Systemversion: %s' % (
+        bios['Vendor'],
+        bios['Version'],
+        bios['Release Date'],
+        system['Version']
+        ))
 
 if __name__ == '__main__':
     profile()
