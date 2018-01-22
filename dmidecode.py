@@ -63,7 +63,8 @@ def _parse_handle_section(lines):
     for line in lines:
         line = line.rstrip()
         if line.startswith('\t\t'):
-            data[k].append(line.lstrip())
+            if isinstance(data[k]) == list:
+                data[k].append(line.lstrip())
         elif line.startswith('\t'):
             k, v = [i.strip() for i in line.lstrip().split(':', 1)]
             if v:
